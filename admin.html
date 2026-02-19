@@ -13,7 +13,7 @@ button{cursor:pointer;background:#a6e3a1;color:#1e1e2e;font-weight:700}
 table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{padding:6px;border:1px solid #45475a;text-align:center}
 th{background:#11111b}
-td button{background:#f38ba8;color:#1e1e2e;font-weight:600}
+td button{background:#f38ba8;color:#1e1e2e;font-weight:600;margin:2px;padding:4px 6px}
 #output{margin-top:10px;color:#f38ba8;font-size:12px}
 </style>
 </head>
@@ -41,27 +41,27 @@ td button{background:#f38ba8;color:#1e1e2e;font-weight:600}
 <script>
 const workerAdminUrl = 'https://mathspacekey.joshua-watson.workers.dev/admin';
 
-async function callAdmin(action, key, extra=''){
+async function callAdmin(action, key, extra='') {
   const adminKey = document.getElementById('adminKey').value.trim();
-  if(!adminKey) return alert('Enter admin password!');
+  if (!adminKey) return alert('Enter admin password!');
   const url = `${workerAdminUrl}?action=${action}&key=${key}${extra}`;
   const resp = await fetch(url, { headers: {'X-Admin-Key': adminKey} });
   return resp.text();
 }
 
-async function refreshKeys(){
+async function refreshKeys() {
   const tbody = document.getElementById('keyTable');
   tbody.innerHTML = '';
   const adminKey = document.getElementById('adminKey').value.trim();
-  if(!adminKey) return;
-  try{
+  if (!adminKey) return;
+  try {
     const resp = await fetch(`${workerAdminUrl}?action=list`, { headers: {'X-Admin-Key': adminKey} });
-    const keys = await resp.json(); // [{name,status,expires}, ...]
-    keys.forEach(k=>{
+    const keys = await resp.json(); // keys = [{name,status,expires}, ...]
+    keys.forEach(k => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${k.name}</td>
-        <td>${k.status}</td>
+        <td>${k.status === 'pending' ? 'Pending activation' : k.status}</td>
         <td>${k.expires ? new Date(k.expires).toLocaleString() : ''}</td>
         <td>
           <button onclick="closeKey('${k.name}')">Close</button>
@@ -71,29 +71,29 @@ async function refreshKeys(){
       tbody.appendChild(tr);
     });
     document.getElementById('output').textContent = 'Keys refreshed';
-  }catch(e){
+  } catch(e) {
     document.getElementById('output').textContent = 'Error refreshing keys: ' + e;
   }
 }
 
-async function createKey(){
+async function createKey() {
   const keyName = document.getElementById('newKey').value.trim();
   const time = document.getElementById('keyTime').value;
-  if(!keyName) return alert('Enter key name!');
+  if (!keyName) return alert('Enter key name!');
   const res = await callAdmin('create', keyName, `&time=${time}`);
   document.getElementById('output').textContent = res;
   refreshKeys();
 }
 
-async function closeKey(key){
+async function closeKey(key) {
   const res = await callAdmin('close', key);
   document.getElementById('output').textContent = res;
   refreshKeys();
 }
 
-async function extendKey(key){
+async function extendKey(key) {
   const minutes = prompt('Enter minutes to extend:', 10);
-  if(!minutes) return;
+  if (!minutes) return;
   const res = await callAdmin('extend', key, `&time=${minutes}`);
   document.getElementById('output').textContent = res;
   refreshKeys();
