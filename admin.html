@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AutoSolver Admin</title>
+<style>
+body { font-family: Arial; max-width: 600px; margin: auto; padding: 20px; }
+input, button { padding: 5px; margin: 5px; }
+pre { background: #eee; padding: 10px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<h1>AutoSolver Admin</h1>
+
+<!-- Admin password input -->
+<input type="password" id="adminKey" placeholder="Admin password"><br>
+
+<!-- Key to manage -->
+<input type="text" id="targetKey" placeholder="Target key"><br>
+
+<!-- Action buttons -->
+<button onclick="checkStatus()">Check Status</button>
+<button onclick="closeKey()">Close Key</button>
+<button onclick="extendKey()">Extend Time</button>
+
+<pre id="output"></pre>
+
+<script>
+const workerUrl = 'https://mathspacekey.joshua-watson.workers.dev/admin'
+const output = document.getElementById('output')
+
+// Helper function to call admin endpoint
+async function callAdmin(action, extra='') {
+  const adminKey = document.getElementById('adminKey').value
+  const targetKey = document.getElementById('targetKey').value
+  if (!adminKey || !targetKey) return alert('Enter admin key and target key')
+  const url = `${workerUrl}?action=${action}&key=${targetKey}${extra}`
+  try {
+    const resp = await fetch(url, { headers: {'X-Admin-Key': adminKey} })
+    const text = await resp.text()
+    output.textContent = text
+  } catch(e) {
+    output.textContent = 'Error: ' + e
+  }
+}
+
+// Button functions
+function checkStatus() { callAdmin('status') }
+function closeKey() { callAdmin('close') }
+function extendKey() {
+  const minutes = prompt('Minutes to extend?', '10')
+  if (minutes) callAdmin('extend', '&time=' + minutes)
+}
+</script>
+</body>
+</html>
