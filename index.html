@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AutoSolver Access</title>
+</head>
+<body>
+  <h1>Get Your AutoSolver Code</h1>
+  <label for="keyInput">Enter your Mathspace key:</label>
+  <input type="text" id="keyInput" placeholder="Your key here">
+  <button id="getCode">Get Code</button>
+
+  <pre id="output" style="background:#eee;padding:10px;margin-top:10px;"></pre>
+
+  <script>
+    const button = document.getElementById('getCode');
+    const output = document.getElementById('output');
+
+    button.addEventListener('click', async () => {
+      const key = document.getElementById('keyInput').value.trim();
+      if(!key) return alert("Please enter a key.");
+
+      try {
+        const resp = await fetch('https://mathspacekey.joshua-watson.workers.dev', {
+          headers: { 'X-User-Key': key }
+        });
+        if(resp.status === 200) {
+          const js = await resp.text();
+          output.textContent = js;
+        } else {
+          output.textContent = 'Invalid key or access denied.';
+        }
+      } catch(e) {
+        output.textContent = 'Error fetching code: ' + e;
+      }
+    });
+  </script>
+</body>
+</html>
