@@ -1,3 +1,56 @@
-const response = await fetch('https://mathspacekey.joshua-watson.workers.dev', {
-  headers: { 'X-User-Key': key }
-});
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MathSpace AutoSolver</title>
+<style>
+body{font-family:monospace;background:#1e1e2e;color:#cdd6f4;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;}
+.container{background:#292936;padding:20px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.6);width:300px;text-align:center;}
+input{width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #45475a;background:#1e1e2e;color:#cdd6f4;font-family:monospace;}
+button{width:100%;padding:8px;border:none;border-radius:6px;background:#a6e3a1;color:#1e1e2e;font-weight:700;margin-top:10px;cursor:pointer;}
+#status{margin-top:10px;color:#f38ba8;font-size:12px;}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>MathSpace AutoSolver</h2>
+  <input type="text" id="userKey" placeholder="Enter your key">
+  <button id="submitKey">Activate</button>
+  <div id="status"></div>
+</div>
+
+<script>
+const workerUrl = 'https://mathspacekey.joshua-watson.workers.dev';
+
+document.getElementById('submitKey').onclick = async () => {
+  const key = document.getElementById('userKey').value.trim();
+  const status = document.getElementById('status');
+  if (!key) return status.textContent = 'Enter a key!';
+
+  status.textContent = 'Checking key...';
+
+  try {
+    const response = await fetch(workerUrl, {
+      headers: { 'X-User-Key': key }
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      status.textContent = 'Error: ' + text;
+      return;
+    }
+
+    const code = await response.text();
+    // Embed the key for runtime protection
+    window._userKey = key;
+    eval(code);
+    status.textContent = 'AutoSolver activated! ✅';
+  } catch(e) {
+    status.textContent = 'Fetch error: ' + e;
+  }
+};
+</script>
+
+</body>
+</html>
