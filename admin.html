@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>loading...</title>
+<title>Admin Panel</title>
 <style>
 body{font-family:monospace;background:#1e1e2e;color:#cdd6f4;margin:0;padding:0}
 h1{padding:10px;text-align:center;color:#89b4fa}
@@ -18,7 +18,7 @@ td button{background:#f38ba8;color:#1e1e2e;font-weight:600;margin:2px;padding:4p
 </style>
 </head>
 <body>
-<h1>welcome master</h1>
+<h1>Admin Panel</h1>
 <div class="container">
   <div>
     Admin Password: <input type="password" id="adminKey" placeholder="Enter password">
@@ -39,7 +39,7 @@ td button{background:#f38ba8;color:#1e1e2e;font-weight:600;margin:2px;padding:4p
 </div>
 
 <script>
-const workerAdminUrl = 'https://mathspacekey.joshua-watson.workers.dev/';
+const workerAdminUrl = 'https://mathspacekey.joshua-watson.workers.dev/admin';
 
 async function callAdmin(action,key,extra=''){
   const adminKey = document.getElementById('adminKey').value.trim();
