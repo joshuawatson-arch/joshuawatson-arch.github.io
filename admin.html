@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MathSpace Admin Panel</title>
+<title>Admin Panel</title>
 <style>
 body{font-family:monospace;background:#1e1e2e;color:#cdd6f4;margin:0;padding:0}
 h1{padding:10px;text-align:center;color:#89b4fa}
@@ -18,7 +18,7 @@ td button{background:#f38ba8;color:#1e1e2e;font-weight:600;margin:2px;padding:4p
 </style>
 </head>
 <body>
-<h1>MathSpace Admin Panel</h1>
+<h1>Admin Panel</h1>
 <div class="container">
   <div>
     Admin Password: <input type="password" id="adminKey" placeholder="Enter password">
@@ -39,12 +39,12 @@ td button{background:#f38ba8;color:#1e1e2e;font-weight:600;margin:2px;padding:4p
 </div>
 
 <script>
-const workerAdminUrl = 'https://mathspacekey.joshua-watson.workers.dev/admin';
+const workerAdminUrl = 'https://mathspacekey.joshua-watson.workers.dev/';
 
 async function callAdmin(action,key,extra=''){
   const adminKey = document.getElementById('adminKey').value.trim();
   if(!adminKey) return alert('Enter admin password!');
-  const url = `${workerAdminUrl}?action=${action}&key=${key}${extra}`;
+  const url = `${workerAdminUrl}?action=${encodeURIComponent(action)}&key=${encodeURIComponent(key)}${extra}`;
   const resp = await fetch(url, { headers: {'X-Admin-Key': adminKey} });
   return resp.text();
 }
@@ -56,6 +56,7 @@ async function refreshKeys(){
   if(!adminKey) return;
   try{
     const resp = await fetch(`${workerAdminUrl}?action=list`, { headers: {'X-Admin-Key': adminKey} });
+    if (!resp.ok) throw new Error(resp.statusText);
     const keys = await resp.json();
     keys.forEach(k=>{
       const tr = document.createElement('tr');
@@ -64,15 +65,15 @@ async function refreshKeys(){
         <td>${k.status==='pending'?'Pending activation':k.status}</td>
         <td>${k.expires?new Date(k.expires).toLocaleString():''}</td>
         <td>
-          <button onclick="closeKey('${k.name}')">Close</button>
-          <button onclick="extendKey('${k.name}')">Extend</button>
+          <button onclick="closeKey('${encodeURIComponent(k.name)}')">Close</button>
+          <button onclick="extendKey('${encodeURIComponent(k.name)}')">Extend</button>
         </td>
       `;
       tbody.appendChild(tr);
     });
     document.getElementById('output').textContent = 'Keys refreshed';
   }catch(e){
-    document.getElementById('output').textContent = 'Error refreshing keys: '+e;
+    document.getElementById('output').textContent = 'Error: '+e;
   }
 }
 
@@ -86,15 +87,15 @@ async function createKey(){
 }
 
 async function closeKey(key){
-  const res = await callAdmin('close', key);
+  const res = await callAdmin('close', decodeURIComponent(key));
   document.getElementById('output').textContent = res;
   refreshKeys();
 }
 
 async function extendKey(key){
   const minutes = prompt('Enter minutes to extend:', 10);
-  if(!minutes) return;
-  const res = await callAdmin('extend', key, `&time=${minutes}`);
+  if (minutes === null) return;
+  const res = await callAdmin('extend', decodeURIComponent(key), `&time=${minutes}`);
   document.getElementById('output').textContent = res;
   refreshKeys();
 }
