@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>loading...</title>
+<title>MathSpace Admin Panel</title>
 <style>
 body{font-family:monospace;background:#1e1e2e;color:#cdd6f4;margin:0;padding:0}
 h1{padding:10px;text-align:center;color:#89b4fa}
@@ -18,7 +18,7 @@ td button{background:#f38ba8;color:#1e1e2e;font-weight:600;margin:2px;padding:4p
 </style>
 </head>
 <body>
-<h1>WELCOME BACK MASTER</h1>
+<h1>MathSpace Admin Panel</h1>
 <div class="container">
   <div>
     Admin Password: <input type="password" id="adminKey" placeholder="Enter password">
@@ -41,28 +41,28 @@ td button{background:#f38ba8;color:#1e1e2e;font-weight:600;margin:2px;padding:4p
 <script>
 const workerAdminUrl = 'https://mathspacekey.joshua-watson.workers.dev/admin';
 
-async function callAdmin(action, key, extra='') {
+async function callAdmin(action,key,extra=''){
   const adminKey = document.getElementById('adminKey').value.trim();
-  if (!adminKey) return alert('Enter admin password!');
+  if(!adminKey) return alert('Enter admin password!');
   const url = `${workerAdminUrl}?action=${action}&key=${key}${extra}`;
   const resp = await fetch(url, { headers: {'X-Admin-Key': adminKey} });
   return resp.text();
 }
 
-async function refreshKeys() {
+async function refreshKeys(){
   const tbody = document.getElementById('keyTable');
   tbody.innerHTML = '';
   const adminKey = document.getElementById('adminKey').value.trim();
-  if (!adminKey) return;
-  try {
+  if(!adminKey) return;
+  try{
     const resp = await fetch(`${workerAdminUrl}?action=list`, { headers: {'X-Admin-Key': adminKey} });
-    const keys = await resp.json(); // keys = [{name,status,expires}, ...]
-    keys.forEach(k => {
+    const keys = await resp.json();
+    keys.forEach(k=>{
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${k.name}</td>
-        <td>${k.status === 'pending' ? 'Pending activation' : k.status}</td>
-        <td>${k.expires ? new Date(k.expires).toLocaleString() : ''}</td>
+        <td>${k.status==='pending'?'Pending activation':k.status}</td>
+        <td>${k.expires?new Date(k.expires).toLocaleString():''}</td>
         <td>
           <button onclick="closeKey('${k.name}')">Close</button>
           <button onclick="extendKey('${k.name}')">Extend</button>
@@ -71,29 +71,29 @@ async function refreshKeys() {
       tbody.appendChild(tr);
     });
     document.getElementById('output').textContent = 'Keys refreshed';
-  } catch(e) {
-    document.getElementById('output').textContent = 'Error refreshing keys: ' + e;
+  }catch(e){
+    document.getElementById('output').textContent = 'Error refreshing keys: '+e;
   }
 }
 
-async function createKey() {
+async function createKey(){
   const keyName = document.getElementById('newKey').value.trim();
   const time = document.getElementById('keyTime').value;
-  if (!keyName) return alert('Enter key name!');
+  if(!keyName) return alert('Enter key name!');
   const res = await callAdmin('create', keyName, `&time=${time}`);
   document.getElementById('output').textContent = res;
   refreshKeys();
 }
 
-async function closeKey(key) {
+async function closeKey(key){
   const res = await callAdmin('close', key);
   document.getElementById('output').textContent = res;
   refreshKeys();
 }
 
-async function extendKey(key) {
+async function extendKey(key){
   const minutes = prompt('Enter minutes to extend:', 10);
-  if (!minutes) return;
+  if(!minutes) return;
   const res = await callAdmin('extend', key, `&time=${minutes}`);
   document.getElementById('output').textContent = res;
   refreshKeys();
